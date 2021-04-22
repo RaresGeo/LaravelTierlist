@@ -54,10 +54,65 @@
                 @enderror
             </div>
 
+            <div id="rows" class="mb-8 text-black text-lg w-full">
+                <div class="flex justify-evenly mb-4">
+                    <select id="colours" name="rowColours[]" class="shadow-inner bg-gray-100 border-2 p-4 mx-4 rounded-lg w-1/12">
+                        <option value="green">Green</option>
+                        <option value="red">Red</option>
+                        <option value="yellow">Amber</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="blue">Blue</option>
+                        <option value="indigo">Indigo</option>
+                        <option value="purple">Violet</option>
+                        <option value="pink">Pink</option>
+                    </select>
+
+                    <input type="text" name="rows[]" placeholder="Name new row" class="shadow-inner bg-gray-100 border-2 w-10/12 p-4 rounded-lg">
+                </div>
+            </div>
+
+            <div class="flex justify-center mb-4">
+                <button type="button" class="bg-blue-500 text-white px-4 py-3 rounded font-medium w-4/12" onclick="addNewRow()">Add a new row</button>
+            </div>
+
             <div class="flex justify-center">
                 <button type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium w-4/12">Create new template</button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function addNewRow() {
+        const newDiv = document.createElement("div")
+        newDiv.className = "flex justify-evenly mb-4"
+
+        const newDropdown = document.createElement("select")
+        newDropdown.innerHTML = document.getElementById("colours").innerHTML
+        newDropdown.name = "rowColours[]"
+        newDropdown.className = "shadow-inner bg-gray-100 border-2 p-4 mx-4 rounded-lg w-1/12"
+
+        const newRow = document.createElement("input")
+        newRow.type = "text"
+        newRow.name = "rows[]"
+        newRow.placeholder = "Name new row"
+        newRow.className = "shadow-inner bg-gray-100 border-2 w-10/12 p-4 rounded-lg"
+
+        const newButton = document.createElement("button")
+        newButton.type = "button"
+        newButton.className = "bg-red-500 text-white mx-4 rounded font-medium w-1/12"
+        newButton.addEventListener('click', removeRow, false)
+        newButton.innerText = "Remove row"
+
+        newDiv.appendChild(newDropdown)
+        newDiv.appendChild(newRow)
+        newDiv.appendChild(newButton)
+
+        document.getElementById("rows").appendChild(newDiv)
+    }
+
+    function removeRow() {
+        this.parentElement.remove()
+    }
+</script>
 @endsection

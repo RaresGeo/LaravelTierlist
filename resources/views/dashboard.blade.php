@@ -7,7 +7,6 @@
 
 <div class="flex justify-center">
     <div class="w-8/12">
-
         <div class="p-6 flex justify-evenly w-full">
             @if ($templates->count())
             @foreach ($templates as $template)

@@ -6,6 +6,7 @@ use App\Http\Controllers\auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\auth\RegisterController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\TierListController;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -19,6 +20,8 @@ Route::post('/logout', [LogoutController::class, 'store'])->name('logout');
 
 Route::get('/newtemplate', [TemplateController::class, 'index'])->name('newtemplate');
 Route::post('/newtemplate', [TemplateController::class, 'store']);
+
+Route::get('templates/{template:id}', [TierListController::class, 'index'])->name('template');
 
 
 Route::get('/', function () {

@@ -24,7 +24,7 @@ class TemplateController extends Controller
 
         $destinationPath = public_path('\images') . '\\' . $imageName;
         $img = Image::make($image->path());
-        $img->resize(200, 200)->save($destinationPath);
+        $img->resize(100, 100)->save($destinationPath);
 
         $newImage = $destination->create([]);
 
@@ -37,9 +37,9 @@ class TemplateController extends Controller
         // Check data
         $this->validate($request, [
             'name' => 'required',
-            'profile' => 'required|mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:2048',
+            'profile' => 'required|mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:10000',
             'imageCollection' => 'required',
-            'imageCollection.*' => 'mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:2048'
+            'imageCollection.*' => 'mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:10000'
         ]);
 
         // Store template
@@ -51,6 +51,18 @@ class TemplateController extends Controller
         // Get all images
         foreach ($request->file('imageCollection') as $image) {
             $this->resizeImage($image, $template->images());
+        }
+
+        // Get all rows
+        if (count($request->rows)) {
+
+            for ($i = 0; $i < count($request->rows); $i++) {
+                $newRow = $template->rows()->create([]);
+
+                $newRow->colour = json_encode($request->rowColours[$i]);
+                $newRow->name = json_encode($request->rows[$i]);
+                $newRow->save();
+            }
         }
 
         // Redirect user to template

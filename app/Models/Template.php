@@ -28,4 +28,9 @@ class Template extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    public function rows()
+    {
+        return $this->hasMany(Row::class);
+    }
 }
