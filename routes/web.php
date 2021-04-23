@@ -21,7 +21,9 @@ Route::post('/logout', [LogoutController::class, 'store'])->name('logout');
 Route::get('/newtemplate', [TemplateController::class, 'index'])->name('newtemplate');
 Route::post('/newtemplate', [TemplateController::class, 'store']);
 
-Route::get('templates/{template:id}', [TierListController::class, 'index'])->name('template');
+Route::get('/templates/{template:id}', [TierListController::class, 'index'])->name('template');
+
+Route::post('/tierlist/{template:id}', [TierListController::class, 'update'])->name('savetierlist');
 
 
 Route::get('/', function () {

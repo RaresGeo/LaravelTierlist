@@ -46,6 +46,11 @@ class User extends Authenticatable
         return $this->hasMany(Template::class);
     }
 
+    public function tierlists()
+    {
+        return $this->hasMany(Tierlist::class);
+    }
+
     public function profile()
     {
         return $this->hasOne(Image::class);

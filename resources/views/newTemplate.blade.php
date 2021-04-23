@@ -60,7 +60,6 @@
                         <option value="green">Green</option>
                         <option value="red">Red</option>
                         <option value="yellow">Amber</option>
-                        <option value="emerald">Emerald</option>
                         <option value="blue">Blue</option>
                         <option value="indigo">Indigo</option>
                         <option value="purple">Violet</option>
@@ -83,24 +82,28 @@
 </div>
 
 <script>
-    function addNewRow() {
-        const newDiv = document.createElement("div")
-        newDiv.className = "flex justify-evenly mb-4"
+    function splitClasses(classes) {
+        return classes.split(" ")
+    }
 
-        const newDropdown = document.createElement("select")
+    function addNewRow() {
+        var newDiv = document.createElement("div")
+        newDiv.classList.add(...splitClasses("flex justify-evenly mb-4"))
+
+        var newDropdown = document.createElement("select")
         newDropdown.innerHTML = document.getElementById("colours").innerHTML
         newDropdown.name = "rowColours[]"
-        newDropdown.className = "shadow-inner bg-gray-100 border-2 p-4 mx-4 rounded-lg w-1/12"
+        newDropdown.classList.add(...splitClasses("shadow-inner bg-gray-100 border-2 p-4 mx-4 rounded-lg w-1/12"))
 
-        const newRow = document.createElement("input")
+        var newRow = document.createElement("input")
         newRow.type = "text"
         newRow.name = "rows[]"
         newRow.placeholder = "Name new row"
-        newRow.className = "shadow-inner bg-gray-100 border-2 w-10/12 p-4 rounded-lg"
+        newRow.classList.add(...splitClasses("shadow-inner bg-gray-100 border-2 w-10/12 p-4 rounded-lg"))
 
-        const newButton = document.createElement("button")
+        var newButton = document.createElement("button")
         newButton.type = "button"
-        newButton.className = "bg-red-500 text-white mx-4 rounded font-medium w-1/12"
+        newButton.classList.add(...splitClasses("bg-red-500 text-white mx-4 rounded font-medium w-1/12"))
         newButton.addEventListener('click', removeRow, false)
         newButton.innerText = "Remove row"
 

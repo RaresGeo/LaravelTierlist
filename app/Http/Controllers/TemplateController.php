@@ -17,14 +17,14 @@ class TemplateController extends Controller
         return view('newTemplate');
     }
 
-    private function resizeImage($image, $destination)
+    private function resizeImage($image, $destination, $size)
     {
 
         $imageName = $image->getClientOriginalName() . time() . '.' . $image->extension();
 
         $destinationPath = public_path('\images') . '\\' . $imageName;
         $img = Image::make($image->path());
-        $img->resize(100, 100)->save($destinationPath);
+        $img->resize($size, $size)->save($destinationPath);
 
         $newImage = $destination->create([]);
 
@@ -46,11 +46,11 @@ class TemplateController extends Controller
         $template = $request->user()->templates()->create($request->only('name', 'description'));
 
         // Get profile picture of template
-        $this->resizeImage($request->file('profile'), $template->profile());
+        $this->resizeImage($request->file('profile'), $template->profile(), 200);
 
         // Get all images
         foreach ($request->file('imageCollection') as $image) {
-            $this->resizeImage($image, $template->images());
+            $this->resizeImage($image, $template->images(), 100);
         }
 
         // Get all rows
