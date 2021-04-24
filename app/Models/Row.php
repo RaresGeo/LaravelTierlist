@@ -12,6 +12,8 @@ class Row extends Model
     protected $fillable = [
         'name',
         'colour',
+        'min',
+        'max',
     ];
 
     public function getColour()

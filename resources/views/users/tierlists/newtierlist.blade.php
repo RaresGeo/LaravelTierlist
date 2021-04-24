@@ -46,23 +46,22 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 </div>
 
 <div class="flex justify-evenly mb-5">
-    <div class="w-2/12 bg-gray-200 p-2 mx-3 text-justify rounded-lg flex justify-center items-center">
-        Template name: {{ $tierlist->template->name }}
-    </div>
-    <div class="w-9/12 bg-gray-200 p-2 mx-3 text-justify rounded-lg flex justify-center items-center">
-        {{ $tierlist->template->description }}
-    </div>
     <div class="w-auto bg-white p-2 mx-3 text-center rounded-lg relative">
         <img src="{{$tierlist->template->profile->path()}}">
         <div class="absolute inset-x-0 bottom-0 h-8 bg-black opacity-75">
-            <p class="text-center text-white">{{ count($tierlist->items) - 1 }}</p>
+            <p class="text-center text-white">{{ $tierlist->template->name }}</p>
         </div>
     </div>
+
+    <div class="w-full bg-gray-200 p-2 mx-3 text-justify rounded-lg flex justify-center items-center">
+        {{ $tierlist->template->description }}
+    </div>
+
 
 </div>
 
 @for ($i = 0; $i < count($tierlist->template->rows); $i++)
-    <div class="flex justify-center mb-5 p-0 mx-0 bg-{{$tierlist->template->rows[$i]->getColour()}}-500" style="height:100px">
+    <div class="flex justify-center mb-5 p-0 mx-0 bg-{{$tierlist->template->rows[$i]->getColour()}}-500 m-0 p-0" style="min-height:100px">
         <div class="bg-{{$tierlist->template->rows[$i]->getColour()}}-700 text-center flex justify-center items-center" style="width:100px">
             @php
             if($tierlist->template->rows[$i]->name == "null")
@@ -72,8 +71,20 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
                 @endphp
         </div>
         <!-- vscode format on save keeps messing this up. Nothing I can do about it. -->
-        <div class="w-full">
+        <div id="row-{{ $i }}" class="min-{{ $tierlist->template->rows[$i]->min }} max-{{ $tierlist->template->rows[$i]->max }} w-full flex flex-wrap m-0 p-0">
             <!-- Where all of the items will go. -->
+            @foreach ($tierlist->items as $item)
+            @unless ($item->image == $tierlist->template->profile)
+            @if((int)$item->score >= $tierlist->template->rows[$i]->min && (int)$item->score < $tierlist->template->rows[$i]->max)
+                <div id="image-{{ $item->image->id }}" class="item-image score-{{ $item->score }}" style="height:100px">
+                    <button class=" itemButton">
+                        <img src="{{$item->image->path()}}">
+                    </button>
+                </div>
+                @endif
+                @endunless
+                @endforeach
+                <!-- This has really high complexity, but I realy cannot think of a better way to do this. -->
         </div>
 
         <button class="bg-{{$tierlist->template->rows[$i]->getColour()}}-700 text-justify flex justify-center items-center row-button" style="width:100px">
@@ -86,11 +97,13 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         <div class="w-8/12 m-0 p-0 flex justify-center flex-wrap">
             @foreach ($tierlist->items as $item)
             @unless ($item->image == $tierlist->template->profile)
-            <div id="image-{{ $item->image->id }}" class="item-image">
+            @if((int)$item->score == 0)
+            <div id="image-{{ $item->image->id }}" class="item-image score-{{ $item->score }}" style="height:100px">
                 <button class=" itemButton">
                     <img src="{{$item->image->path()}}">
                 </button>
             </div>
+            @endif
             @endunless
             @endforeach
         </div>
@@ -165,8 +178,10 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
         function submitFormWithId(event) {
 
+            // Don't submit
             event.preventDefault()
 
+            // Get form and item div
             let form = document.getElementById("item-form");
             let div = form
 
@@ -184,15 +199,39 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
             axios.post("{{ route('savetierlist', $tierlist) }}", data)
                 .then(response => {
-                    console.log(response)
                     closeModal()
+
+                    // ------ Put item in correct row by finding the first row with a min value lower than the item's score
+                    let score = form.score.value
+                    orderByScore(score, div)
+
                 })
                 .catch(error => {
                     // manage error here
+                    console.log(error)
                 })
 
+            // Move item accordingly
+        }
 
+        function orderByScore(score, item) {
+            // ------ Put item in correct row by finding the first row with a min value lower than the item's score
+            for (let i = 0; i < "{{ count($tierlist->template->rows) }}"; i++) {
 
+                let rowDiv = document.getElementById(`row-${i}`)
+                let rowDivMin = parseInt(rowDiv.classList.item(0).split('-')[1])
+
+                if (parseInt(score) >= rowDivMin) {
+                    let items = rowDiv.children
+                    for (let i = 0; i < items.length; i++) {
+                        let itemScore = parseInt(items[i].classList.item(1).split('-')[1])
+                        if (score > itemScore) {
+                            rowDiv.insertBefore(item, items[i])
+                            return
+                        }
+                    }
+                }
+            }
         }
     </script>
 

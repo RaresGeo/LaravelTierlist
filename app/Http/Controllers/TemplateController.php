@@ -39,7 +39,11 @@ class TemplateController extends Controller
             'name' => 'required',
             'profile' => 'required|mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:10000',
             'imageCollection' => 'required',
-            'imageCollection.*' => 'mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:10000'
+            'imageCollection.*' => 'mimes:jpeg,jpg,png,gif,csv,txt,xlx,xls,pdf|max:10000',
+            'rowsMin' => 'required',
+            'rowsMin.*' => 'numeric|min:0|max:100',
+            'rowsMax' => 'required',
+            'rowsMax.*' => 'numeric|min:0|max:100',
         ]);
 
         // Store template
@@ -57,7 +61,14 @@ class TemplateController extends Controller
         if (count($request->rows)) {
 
             for ($i = 0; $i < count($request->rows); $i++) {
-                $newRow = $template->rows()->create([]);
+                $newRow = $template->rows()->create([
+                    'min' => (int)($request->rowsMin[$i]),
+                    'max' => (int)($request->rowsMax[$i]),
+                ]);
+
+                if ($i < count($request->rows) - 1) {
+                    $newRow->min = (int)($request->rowsMax[$i + 1]);
+                }
 
                 $newRow->colour = json_encode($request->rowColours[$i]);
                 $newRow->name = json_encode($request->rows[$i]);
