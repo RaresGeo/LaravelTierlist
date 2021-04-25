@@ -9,39 +9,95 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 <div id="row-modal-menu" class="modal">
 
     <!-- Modal content -->
-    <div class="modal-content">
-        <button class="close-modal">&times;</button>
-        <b>Change row attributes.</p>
-    </div>
+    <div class="flex flex-col items-center shadow-xl rounded-lg modal-content w-4/12 mx-auto">
+        <div class="flex justify-between p-6 bg-white border border-gray-300 rounded-tl-lg rounded-tr-lg w-full">
 
+            <p class="font-semibold text-gray-800">Set item</p>
+            <button class="close-modal">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg></button>
+
+        </div>
+        <div class="flex flex-col p-6 w-full flex-grow border border-gray-300 rounded-bl-lg rounded-br-lg">
+
+            <form id="row-form flex flex-col justify-center items-center w-full flex-grow">
+
+                <div class="flex justify-center mb-4">
+                    <div class="flex flex-col w-full">
+
+                        <label class="mx-3 inline-flex font-semibold text-black" for="name">
+                            These don't work WORK IN PROGRESS</label>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium">Add row above</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-center mb-4">
+                    <div class="flex flex-col w-full">
+                        <label class="mx-3 inline-flex font-semibold text-black" for="score">
+                            These don't work WORK IN PROGRESS</label>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium">Add row below</button>
+                    </div>
+                </div>
+
+                <input type="hidden" name="tierlist" value="{{ $tierlist->id }}">
+                <input type="hidden" id="item-id" name="item-id" value="-1">
+
+                <div class="flex justify-center mt-6">
+                    <button id="item-form-submit" type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </div>
 
 <div id="item-modal-menu" class="modal">
 
     <!-- Modal content -->
-    <div class="modal-content">
-        <button class="close-modal">&times;</button>
-        <form id="item-form">
-            @csrf
+    <div class="flex flex-col items-center shadow-xl rounded-lg modal-content w-4/12 mx-auto">
+        <div class="flex justify-between p-6 bg-white border border-gray-300 rounded-tl-lg rounded-tr-lg w-full">
 
-            <div class="mb-4">
-                <label for="name" class="sr-only">Name</label>
-                <input type="text" name="name" id="name" placeholder="Item's name" class="bg-gray-100 border-2 w-full p-4 rounded-lg">
-            </div>
+            <p class="font-semibold text-gray-800">Set item</p>
+            <button class="close-modal">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg></button>
 
-            <div class="mb-4">
-                <label for="score" class="sr-only">Score</label>
-                <input type="score" name="score" id="score" placeholder="Give the item a score" class="bg-gray-100 border-2 w-full p-4 rounded-lg">
-            </div>
+        </div>
+        <div class="flex flex-col p-6 w-full flex-grow border border-gray-300 rounded-bl-lg rounded-br-lg">
 
-            <input type="hidden" name="tierlist" value="{{ $tierlist->id }}">
-            <input type="hidden" id="item-id" name="item-id" value="-1">
+            <form id="item-form flex flex-col justify-center items-center w-full flex-grow">
+                @csrf
 
-            <div>
-                <button id="item-form-submit" type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium w-full">Save</button>
-            </div>
-        </form>
+                <div class="flex justify-center mb-4">
+                    <div class="flex flex-col w-full">
+
+                        <label class="mx-3 inline-flex font-semibold text-black" for="name">
+                            Name</label>
+                        <input type="text" name="name" id="name" placeholder="Item's name" class="bg-gray-100 border-2 p-4 rounded-lg">
+                    </div>
+                </div>
+
+                <div class="flex justify-center mb-4">
+                    <div class="flex flex-col w-full">
+                        <label class="mx-3 inline-flex font-semibold text-black" for="score">
+                            Score WORK IN PROGRESS, formula to be added soon</label>
+                        <input type="score" name="score" id="score" placeholder="Give the item a score" class="bg-gray-100 border-2 p-4 rounded-lg">
+                    </div>
+                </div>
+
+                <input type="hidden" name="tierlist" value="{{ $tierlist->id }}">
+                <input type="hidden" id="item-id" name="item-id" value="-1">
+
+                <div class="flex justify-center mt-6">
+                    <button id="item-form-submit" type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium">Save</button>
+                </div>
+            </form>
+
+        </div>
     </div>
+
 
 </div>
 
@@ -73,18 +129,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         <!-- vscode format on save keeps messing this up. Nothing I can do about it. -->
         <div id="row-{{ $i }}" class="min-{{ $tierlist->template->rows[$i]->min }} max-{{ $tierlist->template->rows[$i]->max }} w-full flex flex-wrap m-0 p-0">
             <!-- Where all of the items will go. -->
-            @foreach ($tierlist->items as $item)
-            @unless ($item->image == $tierlist->template->profile)
-            @if((int)$item->score >= $tierlist->template->rows[$i]->min && (int)$item->score < $tierlist->template->rows[$i]->max)
-                <div id="image-{{ $item->image->id }}" class="item-image score-{{ $item->score }}" style="height:100px">
-                    <button class=" itemButton">
-                        <img src="{{$item->image->path()}}">
-                    </button>
-                </div>
-                @endif
-                @endunless
-                @endforeach
-                <!-- This has really high complexity, but I realy cannot think of a better way to do this. -->
         </div>
 
         <button class="bg-{{$tierlist->template->rows[$i]->getColour()}}-700 text-justify flex justify-center items-center row-button" style="width:100px">
@@ -97,13 +141,11 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         <div class="w-8/12 m-0 p-0 flex justify-center flex-wrap">
             @foreach ($tierlist->items as $item)
             @unless ($item->image == $tierlist->template->profile)
-            @if((int)$item->score == 0)
-            <div id="image-{{ $item->image->id }}" class="item-image score-{{ $item->score }}" style="height:100px">
+            <div id="image-{{ $item->image->id }}" class="score-{{ $item->score }} item-image" style="height:100px">
                 <button class=" itemButton">
                     <img src="{{$item->image->path()}}">
                 </button>
             </div>
-            @endif
             @endunless
             @endforeach
         </div>
@@ -111,6 +153,13 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
     <script>
         const axios = window.axios
+
+        // Order all items accordingly
+        let items = document.getElementsByClassName("item-image")
+        for (item of items) {
+            let score = parseInt(item.classList.item(0).split("-")[1])
+            orderByScore(score, item)
+        }
 
         // Hook up function to all row buttons
         let rowButtons = document.getElementsByClassName("row-button");
@@ -215,6 +264,8 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         }
 
         function orderByScore(score, item) {
+            if (isNaN(score)) return
+            console.log(score)
             // ------ Put item in correct row by finding the first row with a min value lower than the item's score
             for (let i = 0; i < "{{ count($tierlist->template->rows) }}"; i++) {
 
@@ -222,14 +273,16 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
                 let rowDivMin = parseInt(rowDiv.classList.item(0).split('-')[1])
 
                 if (parseInt(score) >= rowDivMin) {
-                    let items = rowDiv.children
-                    for (let i = 0; i < items.length; i++) {
-                        let itemScore = parseInt(items[i].classList.item(1).split('-')[1])
+                    let children = rowDiv.children
+                    for (child of children) {
+                        let itemScore = parseInt(child.classList.item(1).split('-')[1])
                         if (score > itemScore) {
-                            rowDiv.insertBefore(item, items[i])
+                            rowDiv.insertBefore(item, child)
                             return
                         }
                     }
+                    rowDiv.appendChild(item)
+                    return
                 }
             }
         }
