@@ -21,7 +21,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         </div>
         <div class="flex flex-col p-6 w-full flex-grow border border-gray-300 rounded-bl-lg rounded-br-lg">
 
-            <form id="row-form flex flex-col justify-center items-center w-full flex-grow">
+            <form id="row-form" class="flex flex-col justify-center items-center w-full flex-grow">
 
                 <div class="flex justify-center mb-4">
                     <div class="flex flex-col w-full">
@@ -44,7 +44,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
                 <input type="hidden" id="item-id" name="item-id" value="-1">
 
                 <div class="flex justify-center mt-6">
-                    <button id="item-form-submit" type="submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium">Save</button>
+                    <button id="row-form-submit" class="bg-blue-500 text-white px-4 py-3 rounded font-medium">Save</button>
                 </div>
             </form>
 
@@ -67,7 +67,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         </div>
         <div class="flex flex-col p-6 w-full flex-grow border border-gray-300 rounded-bl-lg rounded-br-lg">
 
-            <form id="item-form flex flex-col justify-center items-center w-full flex-grow">
+            <form id="item-form" class="flex flex-col justify-center items-center w-full flex-grow">
                 @csrf
 
                 <div class="flex justify-center mb-4">
@@ -112,8 +112,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
     <div class="w-full bg-gray-200 p-2 mx-3 text-justify rounded-lg flex justify-center items-center">
         {{ $tierlist->template->description }}
     </div>
-
-
 </div>
 
 @for ($i = 0; $i < count($tierlist->template->rows); $i++)
@@ -141,7 +139,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         <div class="w-8/12 m-0 p-0 flex justify-center flex-wrap">
             @foreach ($tierlist->items as $item)
             @unless ($item->image == $tierlist->template->profile)
-            <div id="image-{{ $item->image->id }}" class="score-{{ $item->score }} item-image" style="height:100px">
+            <div id="image-{{ $item->image->id }}" class="item-image score-{{ $item->score }}" style="height:100px">
                 <button class=" itemButton">
                     <img src="{{$item->image->path()}}">
                 </button>
@@ -157,7 +155,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         // Order all items accordingly
         let items = document.getElementsByClassName("item-image")
         for (item of items) {
-            let score = parseInt(item.classList.item(0).split("-")[1])
+            let score = parseInt(item.classList.item(1).split("-")[1])
             orderByScore(score, item)
         }
 
@@ -213,8 +211,27 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
             // Get modal
             let modal = document.getElementById(modalId)
 
+
             // Move modal to be sibling of button (make child of parent of button with appendChild)
             target.parentElement.appendChild(modal)
+
+            // Do some logic and fill in fields
+            if (modalId.split("-")[0] === "item") {
+                let scoreInput = document.getElementById("score")
+                let itemDiv = modal
+
+                while (!itemDiv.classList.contains("item-image")) {
+                    itemDiv = itemDiv.parentElement
+                }
+
+                let itemScore = parseInt(itemDiv.classList.item(1).split('-')[1])
+                if (!isNaN(itemScore)) {
+                    score.value = itemScore
+                } else {
+                    score.value = ""
+                }
+
+            }
 
             // Make modal visible
             modal.style.display = "block";
@@ -226,33 +243,37 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         })
 
         function submitFormWithId(event) {
-
-            // Don't submit
+            // Don't reload the page
             event.preventDefault()
 
             // Get form and item div
             let form = document.getElementById("item-form");
-            let div = form
+            let itemDiv = form
 
-            while (!div.classList.contains("item-image")) {
-                div = div.parentElement
+            while (!itemDiv.classList.contains("item-image")) {
+                itemDiv = itemDiv.parentElement
             }
 
             let input = document.getElementById("item-id");
-            let itemId = div.id.split("-")[1]
+            let itemId = itemDiv.id.split("-")[1]
             input.setAttribute("value", itemId);
 
-            if (itemId === undefined) return
-            // TODO: DISPLAY AN ERROR HERE... OR SOMETHING
-            data = new FormData(form)
+            formData = new FormData(form)
+            formData.append("item-id", itemDiv.id.split("-")[1])
+            console.log(formData.value)
 
-            axios.post("{{ route('savetierlist', $tierlist) }}", data)
+
+            axios.post("{{ route('savetierlist', $tierlist) }}", formData)
                 .then(response => {
                     closeModal()
+                    console.log(response)
 
                     // ------ Put item in correct row by finding the first row with a min value lower than the item's score
                     let score = form.score.value
-                    orderByScore(score, div)
+                    itemDiv.classList.remove(itemDiv.classList.item(1))
+                    itemDiv.classList.add(`score-${score}`)
+
+                    orderByScore(score, itemDiv)
 
                 })
                 .catch(error => {
@@ -265,7 +286,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
         function orderByScore(score, item) {
             if (isNaN(score)) return
-            console.log(score)
             // ------ Put item in correct row by finding the first row with a min value lower than the item's score
             for (let i = 0; i < "{{ count($tierlist->template->rows) }}"; i++) {
 
