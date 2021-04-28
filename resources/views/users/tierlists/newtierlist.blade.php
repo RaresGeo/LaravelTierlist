@@ -211,7 +211,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         if (modalId.split("-")[0] === "item") {
             let itemDiv = target.closest(".item-image")
             let itemName = getClassValue(itemDiv, "name")
-            console.log(itemName)
 
             // Change name input
             let nameInput = document.getElementById("name")
@@ -220,7 +219,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
             for (formulaVariable of formulaVariables) {
                 let variableValue = getClassValue(itemDiv, formulaVariable)
                 let formulaInput = document.getElementById(`variable-${formulaVariable}`)
-                formulaInput.value = variableValue
+                formulaInput.value = isNaN(parseInt(variableValue)) ? 0 : parseInt(variableValue)
             }
         }
 
@@ -270,6 +269,13 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
             .then(response => {
                 closeModal()
                 changeClassValue(itemDiv, 'name', itemName)
+
+                if (itemDiv.classList.length === 3) {
+                    // Add variables as classes
+                    itemDiv.classList.add(...variableString.split(" "))
+
+                }
+
                 if (itemDiv === highestScoreItem) {
                     // ----- We just changed the highest, we have to reorder all if the new score is different
                     // If its score is higher, just change the score class and reorder all
@@ -357,7 +363,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
     function getClassValue(div, _class) {
         let index = getClassIndex(div, _class)
-        console.log(index)
         return div.classList.item(index).split("-")[1]
     }
 
