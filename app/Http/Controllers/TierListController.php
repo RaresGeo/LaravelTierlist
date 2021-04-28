@@ -49,12 +49,13 @@ class TierlistController extends Controller
     public function update(Request $request)
     {
         // Get item
-        $item = Item::where('tierlist_id', $request->tierlist)->where('image_id', $request->only('item-id'));
+        $item = Item::where('id', $request->only('item-id'));
 
         // Assign values to item
         $item->update([
             'name' => $request->name,
             'score' => $request->score,
+            'variables' => $request->variables,
         ]);
     }
 }

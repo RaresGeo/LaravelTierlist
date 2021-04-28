@@ -19,6 +19,7 @@ class CreateTemplatesTable extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('formula');
         });
     }
 

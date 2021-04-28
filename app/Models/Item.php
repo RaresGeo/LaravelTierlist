@@ -14,6 +14,7 @@ class Item extends Model
         'score',
         'tierlist_id',
         'image_id',
+        'variables',
     ];
 
     public function image()

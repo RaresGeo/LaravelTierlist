@@ -34,6 +34,7 @@ class TemplateController extends Controller
 
     public function store(Request $request)
     {
+
         // Check data
         $this->validate($request, [
             'name' => 'required',
@@ -47,7 +48,7 @@ class TemplateController extends Controller
         ]);
 
         // Store template
-        $template = $request->user()->templates()->create($request->only('name', 'description'));
+        $template = $request->user()->templates()->create($request->only('name', 'description', 'formula'));
 
         // Get profile picture of template
         $this->resizeImage($request->file('profile'), $template->profile(), 200);

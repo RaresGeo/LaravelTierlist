@@ -9,6 +9,8 @@
     <script src="{{ asset('js/app.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/93cb515c97.js" crossorigin="anonymous"></script>
 
     <style>
@@ -54,6 +56,32 @@
             color: #000;
             text-decoration: none;
             cursor: pointer;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 300;
+            visibility: hidden;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+
+            position: absolute;
+            width: 300px;
+            z-index: 1;
+            top: 100%;
+            transform: translate(-50%, 10%)
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            transition: opacity .3s;
         }
     </style>
 </head>

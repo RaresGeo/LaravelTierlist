@@ -55,11 +55,39 @@
             <div class="flex justify-center mb-4">
                 <div class="flex flex-col w-full">
 
-                    <label class="mx-3 inline-flex font-semibold text-black" for="description">
-                        Template description</label>
+                    <div class="mb-1">
+                        <label class="mx-3 inline-flex font-semibold text-black" for="description">
+                            Template description</label>
+                        <button type="button" class="text-white rounded h-full px-4 bg-red-500 hover:bg-red-700" id="description-toggle"><i class="fas fa-minus"></i></button>
+                    </div>
                     <textarea type="text" name="description" id="description" placeholder="A scuffed template for rating scuffed items" class="shadow-inner bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 border-2 w-full p-4 rounded-lg h-36" value="{{ old('description') }}"></textarea>
                 </div>
             </div>
+
+            <div class="flex justify-center mb-4">
+                <div class="flex flex-col w-full">
+
+                    <div class="mb-1">
+                        <label class="mx-3 inline-flex font-semibold text-black" for="description">
+                            Template formula</label>
+
+                        <i class="fas fa-question tooltip text-green-700">
+                            <span class="bg-black text-white rounded-lg text-center px-5 inline-block z-10 font-mono tooltiptext p-2" id="formula-help">
+                                <p>
+                                    Use only integers (No floating point numbers)
+                                    <br>
+                                    Variables have to be only one word
+                                    <br>
+                                    Explain each variable in the template description
+                                </p>
+                            </span>
+                        </i>
+                    </div>
+
+                    <input type="text" name="formula" id="formula" placeholder="A + B + C" class="flex-grow w-full shadow-inner bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 border-2 p-4 rounded-lg @error('email') border-red-500 @enderror" value="{{ old('formula') }}">
+                </div>
+            </div>
+
 
             <div id="rows" class="mb-8 text-black text-lg w-full">
 
@@ -69,12 +97,12 @@
                             Row colour</label>
                         <select name="rowColours[]" class="row-colours shadow-inner bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 border-2 p-4 rounded-lg">
                             <option value="green">Green</option>
-                            <option value="red">Red</option>
-                            <option value="yellow">Amber</option>
+                            <option value="pink">Pink</option>
+                            <option value="purple">Violet</option>
                             <option value="blue">Blue</option>
                             <option value="indigo">Indigo</option>
-                            <option value="purple">Violet</option>
-                            <option value="pink">Pink</option>
+                            <option value="yellow">Amber</option>
+                            <option value="red">Red</option>
                         </select>
                     </div>
 
@@ -133,6 +161,8 @@
 </div>
 
 <script>
+    console.log(window.tokenize("3 + 2 * (1 / 3)"))
+
     const defaultRowNames = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
 
     function splitClasses(classes) {
@@ -195,6 +225,33 @@
             row = row.parentElement
         }
         row.remove()
+    }
+
+    let descriptionToggle = document.getElementById("description-toggle")
+
+    descriptionToggle.addEventListener('click', (event) => toggleButton(event, 'description'), {
+        passive: true
+    })
+
+    function toggleButton(event, tagId) {
+        toggleTag(tagId)
+        // Change colour from blue to red and vice-versa
+        let button = event.target.closest("button")
+        button.classList.toggle("bg-blue-500")
+        button.classList.toggle("hover:bg-blue-700")
+        button.classList.toggle("bg-red-500")
+        button.classList.toggle("hover:bg-red-700")
+
+        // Change icon from plus to minus and vice-versa
+        let icon = button.children[0]
+
+        icon.classList.toggle("fa-plus")
+        icon.classList.toggle("fa-minus")
+    }
+
+    function toggleTag(tagId) {
+        let tag = document.getElementById(tagId)
+        tag.style.display = tag.style.display === "none" ? "initial" : "none";
     }
 </script>
 @endsection

@@ -16,6 +16,7 @@
         "postcss": "^8.1.14"
     },
     "dependencies": {
+        "html2canvas": "^1.0.0-rc.7",
         "tailwindcss": "^2.1.1"
     }
 }

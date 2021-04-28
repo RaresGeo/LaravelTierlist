@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddMinAndMaxToRowsTable extends Migration
+class AddVariablesToItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddMinAndMaxToRowsTable extends Migration
      */
     public function up()
     {
-        Schema::table('rows', function (Blueprint $table) {
-            $table->integer('min');
-            $table->integer('max');
+        Schema::table('items', function (Blueprint $table) {
+            $table->string('variables')->nullable();
         });
     }
 
@@ -26,9 +25,8 @@ class AddMinAndMaxToRowsTable extends Migration
      */
     public function down()
     {
-        Schema::table('rows', function (Blueprint $table) {
-            $table->dropColumn('min');
-            $table->dropColumn('max');
+        Schema::table('items', function (Blueprint $table) {
+            $table->dropColumn('variables');
         });
     }
 }
