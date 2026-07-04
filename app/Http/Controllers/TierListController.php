@@ -7,7 +7,7 @@ use App\Models\Template;
 use App\Models\Tierlist;
 use Illuminate\Http\Request;
 
-class TierlistController extends Controller
+class TierListController extends Controller
 {
     public function __construct()
     {

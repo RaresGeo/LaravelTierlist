@@ -1,0 +1,34 @@
+# Build context excludes — keeps images small and builds reproducible.
+# Dependencies are installed inside the image (composer/npm), never copied from host.
+.git
+.gitignore
+.gitattributes
+.editorconfig
+.styleci.yml
+
+vendor
+node_modules
+
+# Never bake host secrets/state into the image; env is provided at runtime.
+.env
+.env.*
+!.env.example
+
+# Local build artifacts
+public/hot
+public/storage
+public/js
+public/css
+public/mix-manifest.json
+
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Docker/dev tooling isn't needed at runtime (compose files reference it from host)
+docker/dev
+README.md
+Procfile
+tests
+phpunit.xml

@@ -10,12 +10,13 @@
         <div class="p-6 flex justify-evenly w-full">
             @if ($templates->count())
             @foreach ($templates as $template)
-            <x-template :template="$template" />
+                <x-template :template="$template" />
             @endforeach
 
             {{ $templates->links() }}
+
             @else
-            <p>There are no templates, make one!</p>
+                <p class="text-white">There are no templates, <a class="underline text-blue-500" href="{{ route('newtemplate') }}" class="p-3">make one!</a></p>
             @endif
         </div>
     </div>

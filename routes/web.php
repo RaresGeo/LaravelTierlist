@@ -5,9 +5,9 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\TierListController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\auth\LoginController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
-use App\Http\Controllers\auth\RegisterController;
+use App\Http\Controllers\Auth\RegisterController;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -29,7 +29,4 @@ Route::post('/tierlist/{template:id}', [TierListController::class, 'update'])->n
 Route::get('/test', [TestController::class, 'index'])->name('test');
 Route::post('/test', [TestController::class, 'post']);
 
-
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::view('/', 'home')->name('home');

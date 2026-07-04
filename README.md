@@ -10,43 +10,27 @@ Each template has a set number of rows, items and a static formula.
 
 The application itself is rather bland featureless, also html2canvas was refusing to cooperate so resulting screenshots might not always turn out the way you would expect them to.
 
-Built using `Laravel 8.40.0`, `PHP 8.0.3`, `Composer 2.0.12`, `Node 14.15.5`, `npm 6.14.11`.
+Built using `Laravel 8.40.0`, `PHP 8.0.3`, `Composer 2.0.12`, `Node 14.15`, `npm 6.14.11`.
 
 ## How to run
 
-1. Clone the repo
-
-`$ git clone https://github.com/RaresGeo/LaravelTierlist.git`
-
-2. cd into the project
-
-`cd LaravelTierlis`
-
-3. Install dependancies
-
-For Composer run `composer install`
-You might have to go into your `php.ini` file and enable a few extensions, such as GD
-
-For the node package manager run `npm install` or `yarn`
-
-4. Create a .env file
-
-Due to potentially sensitive data being stored within them, .env files are usually gitignored; however, there is an example file which you can copy
-
-`cp .env.example .env`
-
-You will then have to fill in the necessary info, such as the database config
+Everything is containerised, the only prerequisite to running this is `docker` and optionally `make` for ease of use
 
 ```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=test
-DB_USERNAME=root
-DB_PASSWORD=password123
+make dev-up
+
+# Or without make
+# Start up the composer workspace
+docker compose up -d workspace
+# Set up project and create /vendor
+docker compose exec -T workspace composer install --no-interaction --no-progress --prefer-dist
+# Start all other services
+docker compose up -d
+# Run db migrations
+docker compose exec -T workspace php artisan migrate --force
 ```
 
-or your app encryption key, which you can generate with `php atisan key:generate` *this will automatically also place the key in .env*
+OPTIONAL: generate a new app encryption key with `php atisan key:generate` *this will automatically also place the key in .env*
 
 5. Create a database
 

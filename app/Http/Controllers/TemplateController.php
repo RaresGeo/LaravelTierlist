@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 class TemplateController extends Controller
@@ -20,9 +22,12 @@ class TemplateController extends Controller
     private function resizeImage($image, $destination, $size)
     {
 
-        $imageName = $image->getClientOriginalName() . time() . '.' . $image->extension();
+        $baseName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+        $imageName = Str::slug($baseName) . '-' . time() . '.' . $image->extension();
 
-        $destinationPath = public_path('\images') . '\\' . $imageName;
+        $imagesDir = public_path('images');
+
+        $destinationPath = $imagesDir . DIRECTORY_SEPARATOR . $imageName;
         $img = Image::make($image->path());
         $img->resize($size, $size)->save($destinationPath);
 

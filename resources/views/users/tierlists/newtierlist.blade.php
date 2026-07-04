@@ -37,7 +37,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
                     <div class="flex flex-col w-4/12 items-center mx-4 item-modal-variable">
                         <label class="mx-3 inline-flex font-semibold text-black" for="variable">
                             x </label>
-                        <input type="text" name="variable" id="variable" placeholder="1" class="bg-gray-100 border-2 p-4 rounded-lg">
+                        <input type="number" name="variable" id="variable" placeholder="1" class="bg-gray-100 border-2 p-4 rounded-lg">
                     </div>
                 </div>
 
@@ -72,7 +72,7 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
     <div id="tierlist-body" class="flex flex-col items-center w-8/12 bg-gray-900">
 
         @for ($i = 0; $i < count($tierlist->template->rows); $i++)
-            <div class="flex justify-center mb-5 p-0 mx-0 bg-black m-0 p-0 w-full" style="min-height:100px">
+            <div class="flex justify-center mb-5 p-0 mx-0 bg-black m-0 w-full" style="min-height:100px">
                 <div class="bg-{{$tierlist->template->rows[$i]->getColour()}}-700 text-center flex justify-center items-center" style="width:100px">
                     @php
                     if($tierlist->template->rows[$i]->name == "null")
@@ -114,12 +114,11 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
 <script>
     // Get highest score
-    let highestScoreItem = document.getElementsByClassName("item-image")[0]
-    //maxScore = isNaN(maxScore) ? 0 : maxScore
+    let highestScore = 0;
 
     // Get all variables
-    let formula = "{{ $tierlist->template->formula }}"
-    formula = window.tokenize(formula)
+    const templateFormula = "{{ $tierlist->template->formula }}"
+    const formula = window.tokenize(templateFormula)
 
     let formulaVariables = []
 
@@ -151,13 +150,21 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
     const axios = window.axios
 
+    // Get highest score
+    let items = document.getElementsByClassName("item-image")
+    for (item of items) {
+        let score = parseInt(getClassValue(item, "score"))
+        if (score > highestScore) {
+            highestScore = score;
+        }
+    }
+
     // Order all items accordingly
     reorderAll()
 
     function reorderAll() {
         let items = document.getElementsByClassName("item-image")
         for (item of items) {
-
             let score = parseInt(getClassValue(item, "score"))
             orderByScore(score, item)
         }
@@ -239,59 +246,75 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         // Get form and item div
         let form = document.getElementById("item-form");
         let itemDiv = form.closest(".item-image")
+        const oldScore = getScore(itemDiv);
 
         let input = document.getElementById("item-id");
         let itemId = itemDiv.id.split("-")[1]
 
-        formData = new FormData(form)
+        const formData = new FormData(form)
 
-        let variableString = ''
+        let formedFormula = Array.from(formula);
+        let values = Object.create(null);
 
         for (formulaVariable of formulaVariables) {
             let variableInput = form.elements[`variable-${formulaVariable}`]
 
-            formula.splice(formula.indexOf(formulaVariable), 1, variableInput.value)
+            formedFormula.splice(formedFormula.indexOf(formulaVariable), 1, variableInput.value)
 
-            variableString += `${formulaVariable}-${variableInput.value} `
+            values[formulaVariable] = variableInput.value;
 
             formData.delete(`variable-${formulaVariable}`)
         }
-        variableString = variableString.trim()
-        let code = formula.join(' ')
+        let code = formedFormula.join(' ')
         let score = parseInt(window.calculate(code))
         let itemName = form.elements['name'].value
 
+        // Note from Daniel of present time
+        // This "variables" field is persisted in the DB as a string
+        // Every item in the template repeats the variable names in full
+        // Consider refactoring to put in just the values, comma separated
+        // Since we can still reconstruct the result by using the ordered variables
+        // It would be an easy optimisation for the database.
+        formData.append("variables", Object.entries(values).map(([key, value]) => `${key}-${value}`).join(" "))
         formData.append("item-id", itemId)
         formData.append("score", score)
-        formData.append("variables", variableString)
+        values.score = score;
+        values.name = itemName
 
         axios.post("{{ route('savetierlist', $tierlist) }}", formData)
             .then(response => {
                 closeModal()
-                changeClassValue(itemDiv, 'name', itemName)
 
-                if (itemDiv.classList.length === 3) {
-                    // Add variables as classes
-                    itemDiv.classList.add(...variableString.split(" "))
-
+                // Update data in classList
+                for (const oldClass of Array.from(itemDiv.classList)) {
+                    const split = oldClass.split("-");
+                    if (split.length != 2) {
+                        continue;
+                    }
+                    const [key, _] = split;
+                    if (values[key]) {
+                        itemDiv.classList.remove(oldClass);
+                        itemDiv.classList.add(`${key}-${values[key]}`);
+                        delete values[key];
+                    }
                 }
 
-                if (itemDiv === highestScoreItem) {
+                // Add any remaining values
+                Object.entries(values).forEach(([key, value]) => itemDiv.classList.add(`${key}-${value}`));
+
+                if (oldScore === highestScore) {
                     // ----- We just changed the highest, we have to reorder all if the new score is different
                     // If its score is higher, just change the score class and reorder all
-                    if (score > getScore(itemDiv)) {
-                        changeClassValue(itemDiv, 'score', score)
+                    if (score > oldScore) {
                         reorderAll()
-                    } else if (score < getScore(itemDiv)) { // If it's lower, we have to find the new highest and also reorder all
-                        changeClassValue(itemDiv, 'score', score)
+                    } else if (score < oldScore) { // If it's lower, we have to find the new highest and also reorder all
                         highestScoreItem = getHighest(itemDiv)
                         reorderAll()
                     }
                     // If it's the same, do nothing
                 } else {
-                    changeClassValue(itemDiv, 'score', score)
-                    // Check if it's higher 
-                    if (score > getScore(highestScoreItem)) {
+                    // Check if it's higher
+                    if (score > oldScore) {
                         // Change highest and reorder all
                         highestScoreItem = itemDiv
                         reorderAll()
@@ -314,9 +337,12 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         for (let i = 0; i < "{{ count($tierlist->template->rows) }}"; i++) {
 
             let rowDiv = document.getElementById(`row-${i}`)
-            let rowDivMin = parseInt(rowDiv.classList.item(0).split('-')[1])
-
-            if (parseInt(score / getScore(highestScoreItem)) * 100 >= rowDivMin) {
+            let rowMinVal = parseInt(
+                Array.from(rowDiv.classList)
+                .find((classString) => classString.split('-')[0] === 'min')
+                .split('-')[1]
+            )
+            if (parseInt(score / highestScore * 100) >= rowMinVal) {
                 let children = rowDiv.children
                 for (child of children) {
                     let itemScore = parseInt(child.classList.item(1).split('-')[1])

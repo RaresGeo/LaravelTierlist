@@ -1,0 +1,74 @@
+name: Publish images
+
+# Builds the two custom production images (nginx + php-fpm) and pushes them to
+# a registry
+#
+# Required repository secrets:
+#   DOMAIN             base domain; images push to registry.$DOMAIN
+#   REGISTRY_USERNAME  basic-auth user for the registry vhost
+#   REGISTRY_PASSWORD  basic-auth password for the registry vhost
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'app/**'
+      - 'bootstrap/**'
+      - 'config/**'
+      - 'database/**'
+      - 'public/**'
+      - 'resources/**'
+      - 'routes/**'
+      - 'docker/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'webpack.mix.js'
+      - '.github/workflows/publish-images.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: tierlist-web
+            dockerfile: docker/common/nginx/Dockerfile
+            target: ''
+            build-args: |
+              BUILD_ENV=production
+          - image: tierlist-php
+            dockerfile: docker/common/php-fpm/Dockerfile
+            target: production
+            build-args: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.${{ secrets.DOMAIN }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          build-args: ${{ matrix.build-args }}
+          push: true
+          tags: |
+            registry.${{ secrets.DOMAIN }}/${{ matrix.image }}:latest
+            registry.${{ secrets.DOMAIN }}/${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
