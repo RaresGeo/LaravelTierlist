@@ -15,6 +15,11 @@ fi
 # Remove storage-init directory
 rm -rf /var/www/storage-init
 
+# Ensure the uploaded-images volume is writable by the php-fpm workers.
+# It's a named volume shared with nginx; on first creation Docker roots it at
+# root:root, so www-data (the pool user) can't save uploads without this.
+chown www-data:www-data /var/www/public/images
+
 # Drop any stale config/route cache so migrate reads the runtime env
 php artisan config:clear
 php artisan route:clear
