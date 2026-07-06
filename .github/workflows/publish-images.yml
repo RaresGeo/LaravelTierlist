@@ -22,6 +22,7 @@ on:
       - 'docker/**'
       - 'composer.json'
       - 'composer.lock'
+      - 'tailwind.config.js'
       - 'package.json'
       - 'package-lock.json'
       - 'webpack.mix.js'
