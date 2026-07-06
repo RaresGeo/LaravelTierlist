@@ -12,6 +12,17 @@ build-prod-no-cache:
 
 push-prod: build-prod
 	$(PROD) push web php-fpm
+	@# Extra immutable tag for traceability / rollback.
+	@GIT_SHA="$$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"; \
+	if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then \
+		GIT_SHA="$${GIT_SHA}-dirty"; \
+	fi; \
+	for img in $$($(PROD) config --images); do \
+		case "$$img" in *:latest) ;; *) continue ;; esac; \
+		sha_img="$${img%:latest}:$${GIT_SHA}"; \
+		docker tag "$$img" "$$sha_img"; \
+		docker push "$$sha_img"; \
+	done
 
 prod-up:
 	$(PROD) up -d --build
