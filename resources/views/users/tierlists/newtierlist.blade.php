@@ -150,25 +150,52 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
 
     const axios = window.axios
 
-    // Get highest score
-    let items = document.getElementsByClassName("item-image")
-    for (item of items) {
-        let score = parseInt(getClassValue(item, "score"))
-        if (score > highestScore) {
-            highestScore = score;
+    // Rows go highest tier first (row-0 is the top)
+    const rowCount = parseInt("{{ count($tierlist->template->rows) }}")
+
+    // Lay out every item from scratch. Run on load and after each save.
+    function render() {
+        const items = Array.from(document.getElementsByClassName("item-image"))
+
+        // Highest score sets the scale, every row is a percentage of it
+        highestScore = 0
+        for (const item of items) {
+            const score = getItemScore(item)
+            if (score > highestScore) highestScore = score
+        }
+
+        // Highest first so appending into a row keeps it ordered
+        items.sort((a, b) => getItemScore(b) - getItemScore(a))
+        for (const item of items) placeInRow(item)
+    }
+
+    // Search the classes for score-<n>, don't rely on position
+    function getItemScore(item) {
+        const score = parseInt(getClassValue(item, "score"))
+        return isNaN(score) ? 0 : score
+    }
+
+    function placeInRow(item) {
+        // Not scored yet, leave it in the pool
+        const score = parseInt(getClassValue(item, "score"))
+        if (isNaN(score) || highestScore <= 0) return
+        const percentage = score / highestScore * 100
+        for (let i = 0; i < rowCount; i++) {
+            const rowDiv = document.getElementById(`row-${i}`)
+            const rowMinVal = parseInt(
+                Array.from(rowDiv.classList)
+                .find((classString) => classString.split('-')[0] === 'min')
+                .split('-')[1]
+            )
+            if (percentage >= rowMinVal) {
+                rowDiv.appendChild(item)
+                return
+            }
         }
     }
 
-    // Order all items accordingly
-    reorderAll()
-
-    function reorderAll() {
-        let items = document.getElementsByClassName("item-image")
-        for (item of items) {
-            let score = parseInt(getClassValue(item, "score"))
-            orderByScore(score, item)
-        }
-    }
+    // Lay out items on initial load.
+    render()
 
     // Hook up function to all item buttons
     let itemButtons = document.getElementsByClassName("itemButton");
@@ -301,22 +328,8 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
                 // Add any remaining values
                 Object.entries(values).forEach(([key, value]) => itemDiv.classList.add(`${key}-${value}`));
 
-                const previousHighest = highestScore
-                highestScore = 0
-                for (const otherItem of document.getElementsByClassName("item-image")) {
-                    const otherScore = getScore(otherItem)
-                    if (otherScore > highestScore) {
-                        highestScore = otherScore
-                    }
-                }
-
-                if (highestScore !== previousHighest) {
-                    // The scale changed, so every item's percentage changed too.
-                    reorderAll()
-                } else {
-                    // Scale unchanged, only this item needs repositioning.
-                    orderByScore(score, itemDiv)
-                }
+                // Re-lay out everything, the new score might be the new highest
+                render()
             })
             .catch(error => {
                 // manage error here
@@ -324,36 +337,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
             })
 
         // Move item accordingly
-    }
-
-    function orderByScore(score, item) {
-        if (isNaN(score)) return
-        for (let i = 0; i < "{{ count($tierlist->template->rows) }}"; i++) {
-
-            let rowDiv = document.getElementById(`row-${i}`)
-            let rowMinVal = parseInt(
-                Array.from(rowDiv.classList)
-                .find((classString) => classString.split('-')[0] === 'min')
-                .split('-')[1]
-            )
-            if (parseInt(score / highestScore * 100) >= rowMinVal) {
-                let children = rowDiv.children
-                for (child of children) {
-                    let itemScore = parseInt(child.classList.item(1).split('-')[1])
-                    if (score > itemScore) {
-                        rowDiv.insertBefore(item, child)
-                        return
-                    }
-                }
-                rowDiv.appendChild(item)
-                return
-            }
-        }
-    }
-
-    function getScore(itemDiv) {
-        let score = parseInt(itemDiv.classList.item(1).split("-")[1])
-        return isNaN(score) ? 0 : score
     }
 
     function getClassIndex(div, _class) {
@@ -380,7 +363,15 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
     let div = document.querySelector("#tierlist-body");
 
     document.getElementById("canvas-save").addEventListener("click", function() {
-        html2canvas(div, {}).then((canvas) => {
+        html2canvas(div, {
+            // html2canvas starts from the scroll position, so scrolling down a
+            // tall list shifted the capture (white bar up top). Cancel out the
+            // scroll and give it the full page size.
+            scrollX: 0,
+            scrollY: -window.scrollY,
+            windowWidth: document.documentElement.scrollWidth,
+            windowHeight: document.documentElement.scrollHeight,
+        }).then((canvas) => {
             let image = canvas.toDataURL("image/png");
             let link = document.createElement("a");
             document.body.appendChild(link);
