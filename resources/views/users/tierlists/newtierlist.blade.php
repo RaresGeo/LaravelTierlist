@@ -246,7 +246,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
         // Get form and item div
         let form = document.getElementById("item-form");
         let itemDiv = form.closest(".item-image")
-        const oldScore = getScore(itemDiv);
 
         let input = document.getElementById("item-id");
         let itemId = itemDiv.id.split("-")[1]
@@ -302,26 +301,21 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
                 // Add any remaining values
                 Object.entries(values).forEach(([key, value]) => itemDiv.classList.add(`${key}-${value}`));
 
-                if (oldScore === highestScore) {
-                    // ----- We just changed the highest, we have to reorder all if the new score is different
-                    // If its score is higher, just change the score class and reorder all
-                    if (score > oldScore) {
-                        reorderAll()
-                    } else if (score < oldScore) { // If it's lower, we have to find the new highest and also reorder all
-                        highestScoreItem = getHighest(itemDiv)
-                        reorderAll()
+                const previousHighest = highestScore
+                highestScore = 0
+                for (const otherItem of document.getElementsByClassName("item-image")) {
+                    const otherScore = getScore(otherItem)
+                    if (otherScore > highestScore) {
+                        highestScore = otherScore
                     }
-                    // If it's the same, do nothing
+                }
+
+                if (highestScore !== previousHighest) {
+                    // The scale changed, so every item's percentage changed too.
+                    reorderAll()
                 } else {
-                    // Check if it's higher
-                    if (score > oldScore) {
-                        // Change highest and reorder all
-                        highestScoreItem = itemDiv
-                        reorderAll()
-                    } else {
-                        // If it's not, only order this one
-                        orderByScore(score, itemDiv)
-                    }
+                    // Scale unchanged, only this item needs repositioning.
+                    orderByScore(score, itemDiv)
                 }
             })
             .catch(error => {
@@ -360,15 +354,6 @@ $rows = array('S', 'A', 'B', 'C', 'D', 'E', 'F');
     function getScore(itemDiv) {
         let score = parseInt(itemDiv.classList.item(1).split("-")[1])
         return isNaN(score) ? 0 : score
-    }
-
-    function getHighest(pastHighest) {
-        let items = document.getElementsByClassName("item-image")
-
-        for (item of items) {
-            if (getScore(item) > getScore(pastHighest))
-                return item
-        }
     }
 
     function getClassIndex(div, _class) {
