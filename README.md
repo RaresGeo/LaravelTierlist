@@ -2,6 +2,10 @@
 
 ## About the project
 
+🔗 **Live demo:** [tierlists.kryllix.dedyn.io](https://tierlists.kryllix.dedyn.io/)
+
+<p align="center"><img src="docs/screenshot.png" alt="Screenshot of the tier list app" width="800"></p>
+
 There are many tier list websites out there, but most of them use a simple drag and drop API. I have found that generally that leaves a lot of room for interpretation when grading items and people might disagree with other lists simply because they used different crtieria.
 
 This app seeks to remedy that, by instead implementing a formula based system, where items will be graded by score.
