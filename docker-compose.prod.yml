@@ -10,6 +10,10 @@ services:
       - .env.prod
     volumes:
       - laravel-storage-production:/var/www/storage:ro
+      # Uploaded images are written by php-fpm into public/images. nginx must
+      # read from the SAME storage, so share a named volume instead of the
+      # (empty) host directory. php-fpm mounts it rw; nginx only needs ro.
+      - laravel-images-production:/var/www/public/images:ro
     networks:
       - laravel-production
     ports:
@@ -27,6 +31,7 @@ services:
     restart: unless-stopped
     volumes:
       - laravel-storage-production:/var/www/storage
+      - laravel-images-production:/var/www/public/images
     env_file:
       - .env.prod
     networks:
@@ -66,4 +71,5 @@ networks:
 
 volumes:
   laravel-storage-production:
+  laravel-images-production:
   db-data-production:
